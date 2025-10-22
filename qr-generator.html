@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de QR Code</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: #ffffff;
+            border-radius: 8px;
+            padding: 40px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+            border: 1px solid #e0e0e0;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2em;
+            font-weight: 400;
+        }
+
+        .input-group {
+            margin-bottom: 25px;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        input[type="url"] {
+            width: 100%;
+            padding: 15px;
+            border: 1px solid #d0d0d0;
+            border-radius: 4px;
+            font-size: 16px;
+            transition: all 0.2s ease;
+            outline: none;
+        }
+
+        input[type="url"]:focus {
+            border-color: #666;
+            box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.05);
+        }
+
+        .btn {
+            background: #333;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin: 10px;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn:hover {
+            background: #555;
+        }
+
+        .btn:active {
+            transform: translateY(1px);
+        }
+
+        .qr-container {
+            margin: 30px 0;
+            padding: 20px;
+            background: #fafafa;
+            border-radius: 4px;
+            border: 1px solid #e0e0e0;
+            display: none;
+        }
+
+        #qrcode {
+            margin: 0 auto;
+            display: block;
+        }
+
+        .download-link {
+            margin-top: 15px;
+            display: none;
+        }
+
+        .customization-panel {
+            background: #fafafa;
+            border-radius: 4px;
+            padding: 25px;
+            margin: 25px 0;
+            text-align: left;
+            border: 1px solid #e0e0e0;
+        }
+
+        .customization-panel h3 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.2em;
+            font-weight: 500;
+        }
+
+        .row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .half {
+            flex: 1;
+        }
+
+        .color-input {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        input[type="color"] {
+            width: 50px;
+            height: 40px;
+            border: 1px solid #d0d0d0;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        input[type="text"] {
+            width: 100px;
+            padding: 10px;
+            border: 1px solid #d0d0d0;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            margin: 10px 0;
+        }
+
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #d0d0d0;
+            border-radius: 4px;
+            font-size: 14px;
+            background: white;
+        }
+
+        #sizeValue {
+            display: inline-block;
+            margin-left: 10px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .preset-colors {
+            margin-top: 15px;
+        }
+
+        .color-presets {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 10px;
+        }
+
+        .preset-btn {
+            width: 80px;
+            height: 35px;
+            border: 1px solid #d0d0d0;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+            color: #333;
+            transition: all 0.2s ease;
+        }
+
+        .preset-btn:hover {
+            border-color: #666;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 30px 20px;
+            }
+            
+            h1 {
+                font-size: 1.6em;
+            }
+            
+            .row {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Gerador de QR Code</h1>
+        
+        <div class="input-group">
+            <label for="urlInput">Digite o link:</label>
+            <input 
+                type="url" 
+                id="urlInput" 
+                placeholder="https://exemplo.com"
+                value="https://odd.studio/"
+            >
+        </div>
+
+        <div class="customization-panel">
+            <h3>Personalização</h3>
+            
+            <div class="row">
+                <div class="input-group half">
+                    <label for="foregroundColor">Cor do QR Code:</label>
+                    <div class="color-input">
+                        <input type="color" id="foregroundColor" value="#333333">
+                        <input type="text" id="foregroundColorText" value="#333333" placeholder="#000000">
+                    </div>
+                </div>
+
+                <div class="input-group half">
+                    <label for="backgroundColor">Cor de Fundo:</label>
+                    <div class="color-input">
+                        <input type="color" id="backgroundColor" value="#ffffff">
+                        <input type="text" id="backgroundColorText" value="#ffffff" placeholder="#ffffff">
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="input-group half">
+                    <label for="qrSize">Tamanho (px):</label>
+                    <input type="range" id="qrSize" min="200" max="800" value="300" step="50">
+                    <span id="sizeValue">300px</span>
+                </div>
+
+                <div class="input-group half">
+                    <label for="errorLevel">Nível de Correção:</label>
+                    <select id="errorLevel">
+                        <option value="L">Baixo (7%)</option>
+                        <option value="M" selected>Médio (15%)</option>
+                        <option value="Q">Alto (25%)</option>
+                        <option value="H">Muito Alto (30%)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="preset-colors">
+                <label>Presets de Cores:</label>
+                <div class="color-presets">
+                    <button class="preset-btn" onclick="applyPreset('#000000', '#ffffff')" style="background: #000000; color: #fff;">Clássico</button>
+                    <button class="preset-btn" onclick="applyPreset('#0077b5', '#ffffff')" style="background: #0077b5; color: #fff;">Azul</button>
+                    <button class="preset-btn" onclick="applyPreset('#e60023', '#ffffff')" style="background: #e60023; color: #fff;">Vermelho</button>
+                    <button class="preset-btn" onclick="applyPreset('#00a86b', '#ffffff')" style="background: #00a86b; color: #fff;">Verde</button>
+                    <button class="preset-btn" onclick="applyPreset('#ffffff', '#333333')" style="background: #ffffff; color: #333; border: 2px solid #333;">Invertido</button>
+                </div>
+            </div>
+        </div>
+
+        <button class="btn" onclick="generateQR()">
+            Gerar QR Code
+        </button>
+
+        <div class="qr-container" id="qrContainer">
+            <canvas id="qrcode"></canvas>
+            <a href="#" class="btn download-link" id="downloadLink" download="qrcode.png">
+                Baixar QR Code
+            </a>
+        </div>
+    </div>
+
+    <script>
+        let currentQR = null;
+
+        function generateQR() {
+            const url = document.getElementById('urlInput').value.trim();
+            
+            if (!url) {
+                alert('Por favor, digite um link válido!');
+                return;
+            }
+
+            // Validação básica de URL
+            try {
+                new URL(url);
+            } catch (e) {
+                alert('Por favor, digite um link válido (deve começar com http:// ou https://)');
+                return;
+            }
+
+            const canvas = document.getElementById('qrcode');
+            const container = document.getElementById('qrContainer');
+            const downloadLink = document.getElementById('downloadLink');
+
+            // Pega os valores de personalização
+            const foregroundColor = document.getElementById('foregroundColor').value;
+            const backgroundColor = document.getElementById('backgroundColor').value;
+            const size = parseInt(document.getElementById('qrSize').value);
+            const errorLevel = document.getElementById('errorLevel').value;
+
+            // Cria o QR code com as configurações personalizadas
+            currentQR = new QRious({
+                element: canvas,
+                value: url,
+                size: size,
+                background: backgroundColor,
+                foreground: foregroundColor,
+                level: errorLevel
+            });
+
+            // Mostra o container do QR code
+            container.style.display = 'block';
+            
+            // Configura o link de download
+            const dataURL = canvas.toDataURL('image/png');
+            downloadLink.href = dataURL;
+            downloadLink.style.display = 'inline-block';
+
+            // Scroll suave para o QR code
+            container.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function applyPreset(fg, bg) {
+            document.getElementById('foregroundColor').value = fg;
+            document.getElementById('foregroundColorText').value = fg;
+            document.getElementById('backgroundColor').value = bg;
+            document.getElementById('backgroundColorText').value = bg;
+            
+            // Regenera automaticamente se já houver um QR code
+            if (currentQR) {
+                generateQR();
+            }
+        }
+
+        // Sincroniza os inputs de cor
+        document.getElementById('foregroundColor').addEventListener('input', function(e) {
+            document.getElementById('foregroundColorText').value = e.target.value;
+            if (currentQR) generateQR();
+        });
+
+        document.getElementById('foregroundColorText').addEventListener('input', function(e) {
+            if (e.target.value.match(/^#[0-9A-Fa-f]{6}$/)) {
+                document.getElementById('foregroundColor').value = e.target.value;
+                if (currentQR) generateQR();
+            }
+        });
+
+        document.getElementById('backgroundColor').addEventListener('input', function(e) {
+            document.getElementById('backgroundColorText').value = e.target.value;
+            if (currentQR) generateQR();
+        });
+
+        document.getElementById('backgroundColorText').addEventListener('input', function(e) {
+            if (e.target.value.match(/^#[0-9A-Fa-f]{6}$/)) {
+                document.getElementById('backgroundColor').value = e.target.value;
+                if (currentQR) generateQR();
+            }
+        });
+
+        // Atualiza o tamanho em tempo real
+        document.getElementById('qrSize').addEventListener('input', function(e) {
+            document.getElementById('sizeValue').textContent = e.target.value + 'px';
+            if (currentQR) generateQR();
+        });
+
+        // Atualiza o nível de correção em tempo real
+        document.getElementById('errorLevel').addEventListener('change', function() {
+            if (currentQR) generateQR();
+        });
+
+        // Permite gerar QR code pressionando Enter
+        document.getElementById('urlInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                generateQR();
+            }
+        });
+    </script>
+</body>
+</html>
